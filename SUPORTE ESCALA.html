@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escala de revezamento Suporte</title>
+    <!-- Font Awesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para Gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            /* Cores dos Operadores */
+            --op-tayson: #ef4444;    /* Vermelho */
+            --op-gleydson: #3b82f6;  /* Azul */
+            --op-guilherme: #64748b; /* Cinza */
+            --op-tiago: #10b981;     /* Verde */
+
+            /* Cores dos Ícones */
+            --sun-yellow: #f59e0b;   /* Amarelo Sol */
+            --moon-gray: #cbd5e1;    /* Cinza Lua */
+
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --danger: #ef4444;
+            --border-color: #334155;
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        /* --- TELA DE LOGIN --- */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .login-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin-bottom: 0.5rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .login-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent-purple);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--accent-purple);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-login:hover {
+            background-color: #7c3aed;
+        }
+
+        .login-error {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        /* --- HEADER & PROFILE --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #fff;
+        }
+
+        .header h1 i {
+            color: var(--accent-purple);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-undo, .btn-action, .btn-export {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.6rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-undo:hover:not(:disabled), .btn-action:hover, .btn-export:hover {
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
+
+        .btn-undo:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.3rem;
+            transition: color 0.2s;
+        }
+
+        .btn-logout:hover {
+            color: var(--danger);
+        }
+
+        /* NAVEGAÇÃO POR ABAS */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.6rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: var(--bg-card-hover);
+        }
+
+        .tab-btn.active {
+            color: #fff;
+            background: var(--accent-purple);
+        }
+
+        /* NOTIFICAÇÃO DO DIA */
+        .today-alert {
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15));
+            border: 1px solid var(--accent-purple);
+            border-radius: var(--radius);
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .today-alert i {
+            font-size: 1.5rem;
+            color: var(--accent-purple);
+        }
+
+        .today-alert-text strong {
+            color: #fff;
+        }
+
+        .today-alert-text p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        select, input[type="number"] {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        select:hover, input[type="number"]:hover {
+            border-color: var(--accent-purple);
+        }
+
+        /* KPIs Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .kpi-info h3 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-info p {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        /* Layout Main */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* NAVEGAÇÃO DO CALENDÁRIO */
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .calendar-select-group {
+            display: flex;
+            gap: 0.3rem;
+            align-items: center;
+        }
+
+        .calendar-nav select {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            background-color: var(--bg-primary);
+        }
+
+        .calendar-nav button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.4rem 0.7rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-nav button:hover {
+            background-color: var(--bg-card-hover);
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+
+        .calendar-day-header {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding-bottom: 8px;
+        }
+
+        .calendar-day {
+            min-height: 85px;
+            background-color: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .calendar-day.editable {
+            cursor: pointer;
+        }
+
+        .calendar-day.editable:hover {
+            border-color: var(--accent-purple);
+            background-color: rgba(139, 92, 246, 0.08);
+            transform: scale(1.02);
+        }
+
+        .calendar-day.empty {
+            background-color: transparent;
+            border-color: transparent;
+            cursor: default;
+        }
+
+        .calendar-day.today {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+        }
+
+        .day-number {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .event-badge {
+            font-size: 0.72rem;
+            padding: 3px 6px;
+            border-radius: 4px;
+            width: 100%;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #fff;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Badge do Indicador Nota */
+        .bg-nota {
+            background-color: var(--accent-purple);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .icon-sun { color: var(--sun-yellow); }
+        .icon-moon { color: var(--moon-gray); }
+
+        /* Classes de Cores dos Operadores */
+        .bg-tayson { background-color: var(--op-tayson); }
+        .bg-gleydson { background-color: var(--op-gleydson); }
+        .bg-guilherme { background-color: var(--op-guilherme); }
+        .bg-tiago { background-color: var(--op-tiago); }
+
+        .shift-info-box {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .shift-info-box h4 {
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .shift-info-box p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.8rem;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.2rem;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .filter-item label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .export-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .custom-table th, .custom-table td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .custom-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: var(--bg-card-hover);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+        }
+
+        .modal-header-close {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-close-x {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .btn-close-x:hover {
+            color: var(--danger);
+        }
+
+        .modal-card h3 {
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: var(--accent-purple);
+            border: none;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Botão Nota Manual */
+        .btn-toggle-nota {
+            width: 100%;
+            padding: 0.6rem;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px dashed var(--accent-purple);
+            background: rgba(139, 92, 246, 0.1);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-toggle-nota:hover {
+            background: var(--accent-purple);
+        }
+
+        /* CONFIGURAÇÃO DE IMPRESSÃO / SALVAR PDF */
+        @media print {
+            body {
+                background: #fff !important;
+                color: #000 !important;
+                padding: 0 !important;
+            }
+            .header, .nav-tabs, .today-alert, .filter-grid, .export-actions, .controls, .btn-undo, .btn-action, select, button, .modal-overlay {
+                display: none !important;
+            }
+            .card {
+                border: none !important;
+                background: #fff !important;
+                color: #000 !important;
+                box-shadow: none !important;
+            }
+            .custom-table th, .custom-table td {
+                color: #000 !important;
+                border-bottom: 1px solid #ccc !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MODAL DE LOGIN -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <h2><i class="fa-solid fa-headset" style="color: var(--accent-purple);"></i> Escala do Suporte</h2>
+            <p>Informe seus dados de acesso</p>
+            
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" placeholder="Digite seu usuário" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" placeholder="••••••" required>
+                </div>
+                <button type="submit" class="btn-login">Entrar</button>
+                <div class="login-error" id="loginError">Usuário ou senha incorretos!</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO DO DIA (Apenas Admins) -->
+    <div class="modal-overlay" id="editModal" onclick="handleOverlayClick(event, 'editModal')">
+        <div class="modal-card">
+            <div class="modal-header-close">
+                <h3 id="modalTitle">Gerenciar Dia</h3>
+                <button class="btn-close-x" onclick="closeEditModal()" title="Fechar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;" id="modalShiftType"></p>
+            
+            <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">
+                Clique para escalar/remover o operador:
+            </label>
+            <div class="operator-grid-selector" id="operatorGridSelector" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 0.5rem;">
+                <!-- Chips de Operadores gerados via JS -->
+            </div>
+
+            <!-- Botão para Inserir/Remover Nota Manualmente -->
+            <button class="btn-toggle-nota" id="btnToggleNota" onclick="toggleNotaOnSelectedDay()">
+                <i class="fa-solid fa-flag"></i> <span id="btnNotaText">Marcar Nota neste dia</span>
+            </button>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeEditModal()">Concluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE GERENCIAMENTO DE USUÁRIOS (Apenas Admins) -->
+    <div class="modal-overlay" id="userManagementModal" onclick="handleOverlayClick(event, 'userManagementModal')">
+        <div class="modal-card">
+            <div class="modal-header-close">
+                <h3><i class="fa-solid fa-users-gear"></i> Cadastrar Usuários</h3>
+                <button class="btn-close-x" onclick="closeUserModal()" title="Fechar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form onsubmit="handleCreateUser(event)">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="newFullName" placeholder="Ex: Carlos Mota" required>
+                </div>
+                <div class="form-group">
+                    <label>Usuário de Login</label>
+                    <input type="text" id="newUsername" placeholder="Ex: carlos.mota" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="newPassword" placeholder="••••••" required>
+                </div>
+                <div class="form-group">
+                    <label>Nível de Permissão</label>
+                    <select id="newRole" required>
+                        <option value="admin">Administrador (Altera tudo)</option>
+                        <option value="viewer">Visualização (Apenas Consulta)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-save" style="width: 100%;">Salvar Novo Usuário</button>
+            </form>
+
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem;">Usuários Cadastrados:</div>
+            <div class="user-list-box" id="userListBox" style="max-height: 120px; overflow-y: auto; background: var(--bg-primary); padding: 8px; border-radius: 8px; margin-top: 6px;">
+                <!-- Lista de usuários via JS -->
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeUserModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTENT -->
+    <div id="appContent" style="display: none;">
+        <div class="header">
+            <h1><i class="fa-solid fa-headset"></i> Escala de revezamento Suporte</h1>
+            <div class="controls">
+                <button class="btn-action" id="btnManageUsers" onclick="openUserModal()" style="display: none;">
+                    <i class="fa-solid fa-user-plus"></i> Gerenciar Usuários
+                </button>
+
+                <button class="btn-undo" id="btnUndo" onclick="undoLastAction()" title="Desfazer última alteração">
+                    <i class="fa-solid fa-rotate-left"></i> Desfazer
+                </button>
+
+                <div class="user-badge">
+                    <div class="user-info">
+                        <span class="user-name" id="displayUserName">Usuário</span>
+                        <span class="user-role" id="displayUserRole">Perfil</span>
+                    </div>
+                    <button class="btn-logout" onclick="logout()" title="Sair do Sistema">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOTIFICAÇÃO DO DIA ATUAL -->
+        <div class="today-alert" id="todayNotificationBox">
+            <i class="fa-solid fa-bell"></i>
+            <div class="today-alert-text">
+                <strong id="todayNotificationTitle">Verificando escala...</strong>
+                <p id="todayNotificationDesc">Status da sua escala hoje.</p>
+            </div>
+        </div>
+
+        <!-- ABAS DE NAVEGAÇÃO -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" id="tabDashboardBtn" onclick="switchTab('dashboard')">
+                <i class="fa-solid fa-chart-line"></i> Painel Principal
+            </button>
+            <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('history')">
+                <i class="fa-solid fa-list-check"></i> Histórico Completo
+            </button>
+            <button class="tab-btn" id="tabPercursoBtn" onclick="switchTab('percurso')">
+                <i class="fa-solid fa-route"></i> Tabela de Percurso / Margem
+            </button>
+        </div>
+
+        <!-- ABA 1: DASHBOARD / CALENDÁRIO -->
+        <div id="tabDashboard">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                <select id="operatorFilter" onchange="renderDashboard()">
+                    <option value="ALL">Todos os Operadores</option>
+                    <option value="Tayson Santos">Tayson Santos</option>
+                    <option value="Gleydson Marques">Gleydson Marques</option>
+                    <option value="Guilherme Marques">Guilherme Marques</option>
+                    <option value="Tiago Silva">Tiago Silva</option>
+                </select>
+            </div>
+
+            <!-- KPIs -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h3>Total de Plantões</h3>
+                        <p id="kpiTotalShifts">0</p>
+                    </div>
+                    <div class="kpi-icon" style="background: rgba(139, 92, 246, 0.2); color: var(--accent-purple);">
+                        <i class="fa-solid fa-business-time"></i>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h3>Operadores Ativos</h3>
+                        <p id="kpiActiveOperators">0</p>
+                    </div>
+                    <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.2); color: var(--op-gleydson);">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h3>Dias de Final de Semana</h3>
+                        <p id="kpiWeekendShifts">0</p>
+                    </div>
+                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.2); color: var(--sun-yellow);">
+                        <i class="fa-solid fa-sun"></i>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-info">
+                        <h3>Dias de Semana (Noite)</h3>
+                        <p id="kpiWeekdayShifts">0</p>
+                    </div>
+                    <div class="kpi-icon" style="background: rgba(203, 213, 225, 0.2); color: var(--moon-gray);">
+                        <i class="fa-solid fa-moon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layout Central -->
+            <div class="dashboard-grid">
+                <!-- Calendário -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fa-regular fa-calendar-days" style="color: var(--accent-purple);"></i>
+                            <span>Calendário de Escalas</span>
+                        </div>
+                        
+                        <div class="calendar-nav">
+                            <button onclick="changeMonth(-1)" title="Mês Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                            
+                            <div class="calendar-select-group">
+                                <select id="calMonthSelect" onchange="onCalendarSelectChange()">
+                                    <option value="0">Janeiro</option>
+                                    <option value="1">Fevereiro</option>
+                                    <option value="2">Março</option>
+                                    <option value="3">Abril</option>
+                                    <option value="4">Maio</option>
+                                    <option value="5">Junho</option>
+                                    <option value="6">Julho</option>
+                                    <option value="7">Agosto</option>
+                                    <option value="8">Setembro</option>
+                                    <option value="9">Outubro</option>
+                                    <option value="10">Novembro</option>
+                                    <option value="11">Dezembro</option>
+                                </select>
+
+                                <select id="calYearSelect" onchange="onCalendarSelectChange()">
+                                </select>
+                            </div>
+
+                            <button onclick="changeMonth(1)" title="Próximo Mês"><i class="fa-solid fa-chevron-right"></i></button>
+                            <button onclick="resetToToday()" title="Ir para Mês Atual"><i class="fa-solid fa-calendar-day"></i> Hoje</button>
+                        </div>
+                    </div>
+
+                    <div class="calendar-grid" id="calendarDaysHeader">
+                        <div class="calendar-day-header">Dom</div>
+                        <div class="calendar-day-header">Seg</div>
+                        <div class="calendar-day-header">Ter</div>
+                        <div class="calendar-day-header">Qua</div>
+                        <div class="calendar-day-header">Qui</div>
+                        <div class="calendar-day-header">Sex</div>
+                        <div class="calendar-day-header">Sáb</div>
+                    </div>
+
+                    <div class="calendar-grid" id="calendarBody" style="margin-top: 8px;">
+                        <!-- Dias gerados por JS -->
+                    </div>
+                </div>
+
+                <!-- Painel Lateral -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-clock" style="color: var(--accent-cyan);"></i>
+                                <span>Horários da Escala</span>
+                            </div>
+                        </div>
+                        <div class="shift-info-box">
+                            <h4><i class="fa-solid fa-moon icon-moon"></i> Dias úteis (Segunda a Sexta)</h4>
+                            <p>17:00h às 22:00h (Turno Noturno)</p>
+                        </div>
+                        <div class="shift-info-box">
+                            <h4><i class="fa-solid fa-sun icon-sun"></i> Finais de Semana (Sáb / Dom)</h4>
+                            <p>08:00h às 17:00h (Diurno)</p>
+                        </div>
+                        <div class="shift-info-box" style="border-color: var(--accent-purple);">
+                            <h4><i class="fa-solid fa-flag" style="color: var(--accent-purple);"></i> Ciclo de 4 Semanas</h4>
+                            <p>Marcador de <strong>Nota</strong> gerenciável manualmente pelos administradores na segunda-feira após o encerramento do ciclo.</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-chart-pie" style="color: var(--op-gleydson);"></i>
+                                <span>Distribuição de Dias</span>
+                            </div>
+                        </div>
+                        <canvas id="operatorChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 2: HISTÓRICO COM FILTROS AVANÇADOS -->
+        <div id="tabHistory" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fa-solid fa-list-check" style="color: var(--accent-purple);"></i>
+                        <span>Histórico Detalhado de Escalas</span>
+                    </div>
+
+                    <div class="export-actions">
+                        <button class="btn-export" onclick="exportToCSV()" title="Exportar para Excel (CSV)">
+                            <i class="fa-solid fa-file-excel" style="color: #22c55e;"></i> Excel (CSV)
+                        </button>
+                        <button class="btn-export" onclick="exportToPDF()" title="Imprimir ou Salvar PDF">
+                            <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> PDF
+                        </button>
+                        <button class="btn-export" onclick="exportToTXT()" title="Exportar para Texto">
+                            <i class="fa-solid fa-file-lines" style="color: #3b82f6;"></i> TXT
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-grid">
+                    <div class="filter-item">
+                        <label>Operador</label>
+                        <select id="histFilterOp" onchange="renderHistoryTable()">
+                            <option value="ALL">Todos</option>
+                            <option value="Tayson Santos">Tayson Santos</option>
+                            <option value="Gleydson Marques">Gleydson Marques</option>
+                            <option value="Guilherme Marques">Guilherme Marques</option>
+                            <option value="Tiago Silva">Tiago Silva</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-item">
+                        <label>Mês</label>
+                        <select id="histFilterMonth" onchange="renderHistoryTable()">
+                            <option value="ALL">Todos os Meses</option>
+                            <option value="01">Janeiro</option>
+                            <option value="02">Fevereiro</option>
+                            <option value="03">Março</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Maio</option>
+                            <option value="06">Junho</option>
+                            <option value="07">Julho</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-item">
+                        <label>Ano</label>
+                        <select id="histFilterYear" onchange="renderHistoryTable()">
+                        </select>
+                    </div>
+
+                    <div class="filter-item">
+                        <label>Dia Exato</label>
+                        <input type="number" id="histFilterDay" placeholder="Ex: 15" min="1" max="31" oninput="renderHistoryTable()">
+                    </div>
+
+                    <div class="filter-item">
+                        <label>Tipo de Dia</label>
+                        <select id="histFilterDayType" onchange="renderHistoryTable()">
+                            <option value="ALL">Todos</option>
+                            <option value="WEEKDAY">Dias Úteis (Seg-Sex)</option>
+                            <option value="WEEKEND">Final de Semana (Sáb-Dom)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="custom-table" id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Operador / Evento</th>
+                                <th>Dia da Semana</th>
+                                <th>Tipo / Turno</th>
+                                <th>Horário</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Gerado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 3: TABELA DE PERCURSO DOS OPERADORES -->
+        <div id="tabPercurso" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fa-solid fa-route" style="color: var(--accent-cyan);"></i>
+                        <span>Tabela de Percurso e Margem de Trabalho</span>
+                    </div>
+                    <select id="percursoMonthFilter" onchange="renderPercursoTable()">
+                        <option value="CURRENT">Mês Atual no Painel</option>
+                        <option value="ALL">Acumulado Geral (Todos os Tempos)</option>
+                    </select>
+                </div>
+
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">
+                    Acompanhe o volume acumulado de dias trabalhados por cada operador, a distribuição entre dias úteis e finais de semana e a margem percentual de participação na escala.
+                </p>
+
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Operador</th>
+                                <th>Dias Úteis (Noturno)</th>
+                                <th>Fins de Semana (Diurno)</th>
+                                <th>Total de Dias</th>
+                                <th>Horas Trabalhadas (Est.)</th>
+                                <th>Margem na Escala (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="percursoTableBody">
+                            <!-- Gerado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const defaultUsers = [
+            { username: "guilherme.marques", name: "Guilherme Marques", pass: "102030", role: "admin" },
+            { username: "gleydson.marques", name: "Gleydson Marques", pass: "102030", role: "admin" },
+            { username: "tiago.silva", name: "Tiago Silva", pass: "102030", role: "admin" },
+            { username: "tayson.santos", name: "Tayson Santos", pass: "102030", role: "admin" },
+            { username: "marcos.mota", name: "Marcos Mota", pass: "102030", role: "viewer" }
+        ];
+
+        let usersDatabase = JSON.parse(localStorage.getItem('usersDatabase_v10')) || defaultUsers;
+        let currentUser = JSON.parse(localStorage.getItem('currentUser_session')) || null;
+        let selectedDayForEdit = null;
+
+        const availableOperators = [
+            { operador: "Tayson Santos", colorClass: "bg-tayson", dotColor: "#ef4444", hexColor: "#ef4444" },
+            { operador: "Gleydson Marques", colorClass: "bg-gleydson", dotColor: "#3b82f6", hexColor: "#3b82f6" },
+            { operador: "Guilherme Marques", colorClass: "bg-guilherme", dotColor: "#64748b", hexColor: "#64748b" },
+            { operador: "Tiago Silva", colorClass: "bg-tiago", dotColor: "#10b981", hexColor: "#10b981" }
+        ];
+
+        const defaultRawData = [
+            { operador: "Tayson Santos", colorClass: "bg-tayson", shifts: ["2026-08-07", "2026-08-15"] },
+            { operador: "Gleydson Marques", colorClass: "bg-gleydson", shifts: ["2026-08-01", "2026-08-04"] },
+            { operador: "Guilherme Marques", colorClass: "bg-guilherme", shifts: ["2026-08-03", "2026-08-06", "2026-08-22"] },
+            { operador: "Tiago Silva", colorClass: "bg-tiago", shifts: ["2026-08-02", "2026-08-08"] }
+        ];
+
+        let scheduleData = JSON.parse(localStorage.getItem('scheduleData_v10')) || defaultRawData;
+        let noteDays = JSON.parse(localStorage.getItem('noteDays_v10')) || ["2026-09-14"];
+        let historyStack = [];
+
+        // SINCRONIZAÇÃO EM TEMPO REAL ENTRE ABAS/DISPOSITIVOS
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'scheduleData_v10') {
+                scheduleData = JSON.parse(e.newValue) || [];
+                renderAllViews();
+            } else if (e.key === 'noteDays_v10') {
+                noteDays = JSON.parse(e.newValue) || [];
+                renderAllViews();
+            } else if (e.key === 'usersDatabase_v10') {
+                usersDatabase = JSON.parse(e.newValue) || [];
+            }
+        });
+
+        function saveScheduleData() {
+            localStorage.setItem('scheduleData_v10', JSON.stringify(scheduleData));
+            localStorage.setItem('noteDays_v10', JSON.stringify(noteDays));
+        }
+
+        function saveStateToHistory() {
+            historyStack.push(JSON.stringify({ scheduleData, noteDays }));
+            updateUndoButtonState();
+        }
+
+        function undoLastAction() {
+            if (historyStack.length > 0 && currentUser && currentUser.role === 'admin') {
+                const previousState = JSON.parse(historyStack.pop());
+                scheduleData = previousState.scheduleData;
+                noteDays = previousState.noteDays;
+                saveScheduleData();
+                renderAllViews();
+                updateUndoButtonState();
+            }
+        }
+
+        function updateUndoButtonState() {
+            const btnUndo = document.getElementById('btnUndo');
+            if (currentUser && currentUser.role === 'admin' && historyStack.length > 0) {
+                btnUndo.disabled = false;
+            } else {
+                btnUndo.disabled = true;
+            }
+        }
+
+        let currentYear = 2026;
+        let currentMonth = 7; // Agosto
+        let chartInstance = null;
+
+        function isNoteDay(dateKey) {
+            return noteDays.includes(dateKey);
+        }
+
+        function initYearSelectors() {
+            const calYearSelect = document.getElementById('calYearSelect');
+            const histFilterYear = document.getElementById('histFilterYear');
+
+            calYearSelect.innerHTML = '';
+            histFilterYear.innerHTML = '<option value="ALL">Todos os Anos</option>';
+
+            for (let y = 2020; y <= 2100; y++) {
+                const opt1 = document.createElement('option');
+                opt1.value = y;
+                opt1.innerText = y;
+                if (y === currentYear) opt1.selected = true;
+                calYearSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = y.toString();
+                opt2.innerText = y.toString();
+                if (y === 2026) opt2.selected = true;
+                histFilterYear.appendChild(opt2);
+            }
+        }
+
+        function updateCalendarNavControls() {
+            document.getElementById('calMonthSelect').value = currentMonth;
+            document.getElementById('calYearSelect').value = currentYear;
+        }
+
+        function onCalendarSelectChange() {
+            currentMonth = parseInt(document.getElementById('calMonthSelect').value, 10);
+            currentYear = parseInt(document.getElementById('calYearSelect').value, 10);
+            renderDashboard();
+            renderPercursoTable();
+        }
+
+        // AUTO-LOGIN AO NAVEGAR / RECARREGAR
+        window.addEventListener('DOMContentLoaded', () => {
+            initYearSelectors();
+            if (currentUser) {
+                initUserSession(currentUser);
+            }
+        });
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const userVal = document.getElementById('username').value.trim().toLowerCase();
+            const passVal = document.getElementById('password').value.trim();
+            const errorElement = document.getElementById('loginError');
+
+            const foundUser = usersDatabase.find(u => u.username.toLowerCase() === userVal && u.pass === passVal);
+
+            if (foundUser) {
+                currentUser = foundUser;
+                localStorage.setItem('currentUser_session', JSON.stringify(currentUser));
+                errorElement.style.display = "none";
+                initUserSession(currentUser);
+            } else {
+                errorElement.style.display = "block";
+            }
+        }
+
+        function initUserSession(user) {
+            document.getElementById('loginOverlay').style.display = "none";
+            document.getElementById('appContent').style.display = "block";
+            
+            document.getElementById('displayUserName').innerText = user.name;
+            document.getElementById('displayUserRole').innerText = user.role === 'admin' ? 'Administrador' : 'Visualização';
+
+            if (user.role === 'admin') {
+                document.getElementById('btnManageUsers').style.display = 'flex';
+            } else {
+                document.getElementById('btnManageUsers').style.display = 'none';
+            }
+
+            updateUndoButtonState();
+            renderAllViews();
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser_session');
+            document.getElementById('appContent').style.display = "none";
+            document.getElementById('loginOverlay').style.display = "flex";
+            document.getElementById('username').value = "";
+            document.getElementById('password').value = "";
+        }
+
+        function renderAllViews() {
+            checkTodayNotification();
+            renderDashboard();
+            renderHistoryTable();
+            renderPercursoTable();
+        }
+
+        function switchTab(tabName) {
+            document.getElementById('tabDashboard').style.display = 'none';
+            document.getElementById('tabHistory').style.display = 'none';
+            document.getElementById('tabPercurso').style.display = 'none';
+
+            document.getElementById('tabDashboardBtn').classList.remove('active');
+            document.getElementById('tabHistoryBtn').classList.remove('active');
+            document.getElementById('tabPercursoBtn').classList.remove('active');
+
+            if (tabName === 'dashboard') {
+                document.getElementById('tabDashboard').style.display = 'block';
+                document.getElementById('tabDashboardBtn').classList.add('active');
+            } else if (tabName === 'history') {
+                document.getElementById('tabHistory').style.display = 'block';
+                document.getElementById('tabHistoryBtn').classList.add('active');
+                renderHistoryTable();
+            } else if (tabName === 'percurso') {
+                document.getElementById('tabPercurso').style.display = 'block';
+                document.getElementById('tabPercursoBtn').classList.add('active');
+                renderPercursoTable();
+            }
+        }
+
+        function checkTodayNotification() {
+            if (!currentUser) return;
+
+            const now = new Date();
+            const dateKey = formatDateKey(now.getFullYear(), now.getMonth(), now.getDate());
+
+            const userShiftsToday = [];
+            scheduleData.forEach(item => {
+                if (item.shifts && item.shifts.includes(dateKey)) {
+                    userShiftsToday.push(item.operador);
+                }
+            });
+
+            const titleEl = document.getElementById('todayNotificationTitle');
+            const descEl = document.getElementById('todayNotificationDesc');
+
+            if (isNoteDay(dateKey)) {
+                titleEl.innerHTML = `<span style="color: var(--accent-purple)">Dia de Nota!</span>`;
+                descEl.innerText = "Fim de ciclo de escala do suporte.";
+                return;
+            }
+
+            const isUserScheduled = userShiftsToday.some(op => op.toLowerCase().includes(currentUser.name.split(' ')[0].toLowerCase()));
+
+            if (isUserScheduled) {
+                const isWeekend = (now.getDay() === 0 || now.getDay() === 6);
+                const shiftTime = isWeekend ? "Diurno (08:00h às 17:00h)" : "Noturno (17:00h às 22:00h)";
+                titleEl.innerHTML = `<span style="color: var(--accent-cyan)">Atenção, ${currentUser.name.split(' ')[0]}!</span> Hoje é o seu dia de escala.`;
+                descEl.innerText = `Seu turno hoje é: ${shiftTime}.`;
+            } else if (userShiftsToday.length > 0) {
+                titleEl.innerText = `Hoje (${now.getDate()}/${now.getMonth() + 1}): Plantão de ${userShiftsToday.join(', ')}`;
+                descEl.innerText = "Você não está escalado para o dia de hoje.";
+            } else {
+                titleEl.innerText = `Nenhum operador escalado para hoje.`;
+                descEl.innerText = "Dia livre no cronograma de escalas.";
+            }
+        }
+
+        function renderDashboard() {
+            updateCalendarNavControls();
+            const selectedOperator = document.getElementById('operatorFilter').value;
+            renderCalendar(selectedOperator);
+            renderKPIs(selectedOperator);
+            renderChart(selectedOperator);
+        }
+
+        function formatDateKey(year, month, day) {
+            const m = String(month + 1).padStart(2, '0');
+            const d = String(day).padStart(2, '0');
+            return `${year}-${m}-${d}`;
+        }
+
+        function renderKPIs(selectedOp) {
+            let totalShifts = 0;
+            let weekendShifts = 0;
+            let weekdayShifts = 0;
+            let activeOpsSet = new Set();
+
+            const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+
+            scheduleData.forEach(item => {
+                if (selectedOp === 'ALL' || selectedOp === item.operador) {
+                    (item.shifts || []).forEach(dateStr => {
+                        if (dateStr.startsWith(monthPrefix)) {
+                            totalShifts++;
+                            activeOpsSet.add(item.operador);
+                            
+                            const parts = dateStr.split('-');
+                            const date = new Date(parts[0], parts[1] - 1, parts[2]);
+                            const dayOfWeek = date.getDay();
+                            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                                weekendShifts++;
+                            } else {
+                                weekdayShifts++;
+                            }
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('kpiTotalShifts').innerText = totalShifts;
+            document.getElementById('kpiActiveOperators').innerText = selectedOp === 'ALL' ? activeOpsSet.size : (totalShifts > 0 ? 1 : 0);
+            document.getElementById('kpiWeekendShifts').innerText = weekendShifts;
+            document.getElementById('kpiWeekdayShifts').innerText = weekdayShifts;
+        }
+
+        function renderCalendar(selectedOp) {
+            const calendarBody = document.getElementById('calendarBody');
+            calendarBody.innerHTML = '';
+
+            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+            const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'calendar-day empty';
+                calendarBody.appendChild(emptyCell);
+            }
+
+            const today = new Date();
+            for (let day = 1; day <= lastDay; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                
+                if (currentUser && currentUser.role === 'admin') {
+                    dayCell.classList.add('editable');
+                    dayCell.onclick = () => openEditModal(day);
+                }
+
+                if (today.getDate() === day && today.getMonth() === currentMonth && today.getFullYear() === currentYear) {
+                    dayCell.classList.add('today');
+                }
+
+                const dayNumSpan = document.createElement('span');
+                dayNumSpan.className = 'day-number';
+                dayNumSpan.innerText = day;
+                dayCell.appendChild(dayNumSpan);
+
+                const dateKey = formatDateKey(currentYear, currentMonth, day);
+                const dateObj = new Date(currentYear, currentMonth, day);
+                const isWeekend = (dateObj.getDay() === 0 || dateObj.getDay() === 6);
+
+                // INSERE A PALAVRA "NOTA" SE TIVER SIDO MARCADA MANUALMENTE
+                if (isNoteDay(dateKey)) {
+                    const badgeNota = document.createElement('div');
+                    badgeNota.className = 'event-badge bg-nota';
+                    badgeNota.title = 'Término de Ciclo (Nota)';
+                    badgeNota.innerHTML = `<span>NOTA</span> <i class="fa-solid fa-flag"></i>`;
+                    dayCell.appendChild(badgeNota);
+                }
+
+                scheduleData.forEach(item => {
+                    if ((selectedOp === 'ALL' || selectedOp === item.operador) && item.shifts && item.shifts.includes(dateKey)) {
+                        const opInfo = availableOperators.find(o => o.operador === item.operador);
+                        const badge = document.createElement('div');
+                        badge.className = `event-badge ${opInfo ? opInfo.colorClass : 'bg-guilherme'}`;
+                        badge.title = `${item.operador} (${isWeekend ? 'Diurno' : 'Noturno'})`;
+                        
+                        const iconClass = isWeekend ? 'fa-sun icon-sun' : 'fa-moon icon-moon';
+                        const opFirstName = item.operador.split(' ')[0];
+                        
+                        badge.innerHTML = `<span>${selectedOp === 'ALL' ? opFirstName : 'Escalado'}</span> <i class="fa-solid ${iconClass}"></i>`;
+                        dayCell.appendChild(badge);
+                    }
+                });
+
+                calendarBody.appendChild(dayCell);
+            }
+        }
+
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            if (currentYear > 2100) currentYear = 2100;
+            if (currentYear < 2000) currentYear = 2000;
+            renderDashboard();
+            renderPercursoTable();
+        }
+
+        function resetToToday() {
+            const today = new Date();
+            currentYear = today.getFullYear();
+            currentMonth = today.getMonth();
+            renderDashboard();
+            renderPercursoTable();
+        }
+
+        function getFilteredHistoryData() {
+            const op = document.getElementById('histFilterOp').value;
+            const month = document.getElementById('histFilterMonth').value;
+            const year = document.getElementById('histFilterYear').value;
+            const dayVal = document.getElementById('histFilterDay').value.trim();
+            const dayType = document.getElementById('histFilterDayType').value;
+
+            let records = [];
+
+            scheduleData.forEach(item => {
+                if (op === 'ALL' || item.operador === op) {
+                    (item.shifts || []).forEach(dateStr => {
+                        const parts = dateStr.split('-');
+                        const y = parts[0];
+                        const m = parts[1];
+                        const d = parts[2];
+
+                        const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+                        const isWeekend = (dateObj.getDay() === 0 || dateObj.getDay() === 6);
+
+                        if (year !== 'ALL' && y !== year) return;
+                        if (month !== 'ALL' && m !== month) return;
+                        if (dayVal !== '' && parseInt(d, 10) !== parseInt(dayVal, 10)) return;
+                        if (dayType === 'WEEKDAY' && isWeekend) return;
+                        if (dayType === 'WEEKEND' && !isWeekend) return;
+
+                        const daysOfWeekNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+
+                        records.push({
+                            dateStr: dateStr,
+                            formattedDate: `${d}/${m}/${y}`,
+                            operador: item.operador,
+                            dayName: daysOfWeekNames[dateObj.getDay()],
+                            isWeekend: isWeekend,
+                            shiftType: isWeekend ? "Diurno (Fim de Semana)" : "Noturno (Dia Útil)",
+                            shiftTime: isWeekend ? "08:00h às 17:00h" : "17:00h às 22:00h"
+                        });
+                    });
+                }
+            });
+
+            // Inclui as Notas no histórico
+            if (op === 'ALL') {
+                noteDays.forEach(dateStr => {
+                    const parts = dateStr.split('-');
+                    const y = parts[0];
+                    const m = parts[1];
+                    const d = parts[2];
+
+                    if (year !== 'ALL' && y !== year) return;
+                    if (month !== 'ALL' && m !== month) return;
+                    if (dayVal !== '' && parseInt(d, 10) !== parseInt(dayVal, 10)) return;
+
+                    const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+                    const daysOfWeekNames = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+
+                    records.push({
+                        dateStr: dateStr,
+                        formattedDate: `${d}/${m}/${y}`,
+                        operador: "NOTA (Término de Ciclo)",
+                        dayName: daysOfWeekNames[dateObj.getDay()],
+                        isWeekend: false,
+                        shiftType: "Encerramento de Ciclo",
+                        shiftTime: "N/A"
+                    });
+                });
+            }
+
+            records.sort((a, b) => new Date(a.dateStr) - new Date(b.dateStr));
+            return records;
+        }
+
+        function renderHistoryTable() {
+            const records = getFilteredHistoryData();
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+
+            if (records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 1.5rem;">Nenhum registro de escala encontrado com os filtros selecionados.</td></tr>`;
+                return;
+            }
+
+            records.forEach(r => {
+                const isNota = r.operador.includes("NOTA");
+                const iconClass = isNota ? 'fa-flag style="color:var(--accent-purple);"' : (r.isWeekend ? 'fa-sun icon-sun' : 'fa-moon icon-moon');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${r.formattedDate}</strong></td>
+                    <td><strong style="${isNota ? 'color: var(--accent-purple);' : ''}">${r.operador}</strong></td>
+                    <td>${r.dayName}</td>
+                    <td><i class="fa-solid ${iconClass}"></i> ${r.shiftType}</td>
+                    <td>${r.shiftTime}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function exportToCSV() {
+            const records = getFilteredHistoryData();
+            if (records.length === 0) {
+                alert("Nenhum dado disponível para exportação.");
+                return;
+            }
+
+            const escapeCSV = (val) => {
+                let str = String(val);
+                if (str.includes(';') || str.includes('"') || str.includes('\n')) {
+                    str = '"' + str.replace(/"/g, '""') + '"';
+                }
+                return str;
+            };
+
+            let csvLines = [];
+            csvLines.push(["Data", "Operador", "Dia da Semana", "Tipo / Turno", "Horário"].map(escapeCSV).join(';'));
+
+            records.forEach(r => {
+                csvLines.push([
+                    r.formattedDate,
+                    r.operador,
+                    r.dayName,
+                    r.shiftType,
+                    r.shiftTime
+                ].map(escapeCSV).join(';'));
+            });
+
+            const blob = new Blob(["\uFEFF" + csvLines.join('\r\n')], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Escala_Suporte_Relatorio_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportToTXT() {
+            const records = getFilteredHistoryData();
+            if (records.length === 0) {
+                alert("Nenhum dado disponível para exportação.");
+                return;
+            }
+
+            let txtContent = "====================================================\n";
+            txtContent += " RELATÓRIO DE ESCALA DE REVEZAMENTO - SUPORTE\n";
+            txtContent += ` Gerado em: ${new Date().toLocaleString('pt-BR')}\n`;
+            txtContent += "====================================================\n\n";
+
+            records.forEach(r => {
+                txtContent += `Data: ${r.formattedDate} (${r.dayName})\n`;
+                txtContent += `Operador: ${r.operador}\n`;
+                txtContent += `Turno: ${r.shiftType} | Horário: ${r.shiftTime}\n`;
+                txtContent += "----------------------------------------------------\n";
+            });
+
+            const blob = new Blob([txtContent], { type: "text/plain;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Escala_Suporte_Relatorio_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // COMANDO DE IMPRESSÃO / SALVAR EM PDF
+        function exportToPDF() {
+            window.print();
+        }
+
+        function renderPercursoTable() {
+            const filterType = document.getElementById('percursoMonthFilter').value;
+            const tbody = document.getElementById('percursoTableBody');
+            tbody.innerHTML = '';
+
+            const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+            let grandTotalShifts = 0;
+
+            const stats = availableOperators.map(opInfo => {
+                const opData = scheduleData.find(item => item.operador === opInfo.operador);
+                let weekdayCount = 0;
+                let weekendCount = 0;
+
+                if (opData && opData.shifts) {
+                    opData.shifts.forEach(dateStr => {
+                        if (filterType === 'ALL' || dateStr.startsWith(monthPrefix)) {
+                            const parts = dateStr.split('-');
+                            const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+                            const isWeekend = (dateObj.getDay() === 0 || dateObj.getDay() === 6);
+                            
+                            if (isWeekend) weekendCount++;
+                            else weekdayCount++;
+                        }
+                    });
+                }
+
+                const totalDays = weekdayCount + weekendCount;
+                grandTotalShifts += totalDays;
+                const totalHours = (weekdayCount * 5) + (weekendCount * 9);
+
+                return {
+                    operador: opInfo.operador,
+                    color: opInfo.hexColor,
+                    weekdayCount,
+                    weekendCount,
+                    totalDays,
+                    totalHours
+                };
+            });
+
+            stats.forEach(stat => {
+                const percentage = grandTotalShifts > 0 ? ((stat.totalDays / grandTotalShifts) * 100).toFixed(1) : 0;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${stat.operador}</strong></td>
+                    <td>${stat.weekdayCount} dias (5h/dia)</td>
+                    <td>${stat.weekendCount} dias (9h/dia)</td>
+                    <td><strong style="color: var(--accent-cyan);">${stat.totalDays} dias</strong></td>
+                    <td>${stat.totalHours} hrs</td>
+                    <td style="width: 220px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 2px;">
+                            <span>Margem</span>
+                            <strong>${percentage}%</strong>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: ${percentage}%; background-color: ${stat.color};"></div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleOverlayClick(event, modalId) {
+            if (event.target.id === modalId) {
+                if (modalId === 'editModal') closeEditModal();
+                if (modalId === 'userManagementModal') closeUserModal();
+            }
+        }
+
+        function openEditModal(day) {
+            if (!currentUser || currentUser.role !== 'admin') return;
+
+            selectedDayForEdit = day;
+            const dateKey = formatDateKey(currentYear, currentMonth, day);
+            const dateObj = new Date(currentYear, currentMonth, day);
+            const isWeekend = (dateObj.getDay() === 0 || dateObj.getDay() === 6);
+
+            document.getElementById('modalTitle').innerText = `Gerenciar Dia ${day}/${currentMonth + 1}/${currentYear}`;
+            document.getElementById('modalShiftType').innerText = isWeekend ? 'Turno do dia: Diurno (08h às 17h)' : 'Turno do dia: Noturno (17h às 22h)';
+
+            // Atualiza o estado do botão "Nota"
+            const btnNotaText = document.getElementById('btnNotaText');
+            if (isNoteDay(dateKey)) {
+                btnNotaText.innerText = 'Remover Marcação de Nota';
+            } else {
+                btnNotaText.innerText = 'Marcar Nota neste dia';
+            }
+
+            renderOperatorChips(dateKey);
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function toggleNotaOnSelectedDay() {
+            if (!currentUser || currentUser.role !== 'admin' || !selectedDayForEdit) return;
+
+            const dateKey = formatDateKey(currentYear, currentMonth, selectedDayForEdit);
+            saveStateToHistory();
+
+            const index = noteDays.indexOf(dateKey);
+            if (index > -1) {
+                noteDays.splice(index, 1);
+            } else {
+                noteDays.push(dateKey);
+            }
+
+            saveScheduleData();
+            openEditModal(selectedDayForEdit);
+            renderAllViews();
+        }
+
+        function renderOperatorChips(dateKey) {
+            const container = document.getElementById('operatorGridSelector');
+            container.innerHTML = '';
+
+            availableOperators.forEach(op => {
+                const targetOp = scheduleData.find(item => item.operador === op.operador);
+                const isAssigned = targetOp && targetOp.shifts && targetOp.shifts.includes(dateKey);
+
+                const chip = document.createElement('div');
+                chip.className = `op-chip ${isAssigned ? 'active' : ''}`;
+                chip.style.cssText = "background: var(--bg-primary); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;";
+                chip.innerHTML = `
+                    <span><span class="op-chip-dot" style="background:${op.dotColor}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px;"></span>${op.operador.split(' ')[0]}</span>
+                    <i class="fa-solid ${isAssigned ? 'fa-check' : 'fa-plus'}" style="color:${isAssigned ? '#22c55e' : 'var(--text-muted)'}"></i>
+                `;
+                chip.onclick = () => toggleOperatorShift(op.operador, dateKey);
+                container.appendChild(chip);
+            });
+        }
+
+        function toggleOperatorShift(operadorName, dateKey) {
+            if (!currentUser || currentUser.role !== 'admin') return;
+
+            saveStateToHistory();
+
+            let targetOp = scheduleData.find(op => op.operador === operadorName);
+            if (!targetOp) {
+                const opInfo = availableOperators.find(o => o.operador === operadorName);
+                targetOp = {
+                    operador: operadorName,
+                    colorClass: opInfo ? opInfo.colorClass : 'bg-guilherme',
+                    shifts: []
+                };
+                scheduleData.push(targetOp);
+            }
+
+            if (!targetOp.shifts) targetOp.shifts = [];
+
+            const index = targetOp.shifts.indexOf(dateKey);
+            if (index > -1) {
+                targetOp.shifts.splice(index, 1);
+            } else {
+                targetOp.shifts.push(dateKey);
+            }
+
+            saveScheduleData();
+            renderOperatorChips(dateKey);
+            renderAllViews();
+        }
+
+        function closeEditModal() {
+            selectedDayForEdit = null;
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function openUserModal() {
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert("Acesso negado! Apenas administradores podem gerenciar usuários.");
+                return;
+            }
+            renderUserList();
+            document.getElementById('userManagementModal').style.display = 'flex';
+        }
+
+        function closeUserModal() {
+            document.getElementById('userManagementModal').style.display = 'none';
+        }
+
+        function handleCreateUser(event) {
+            event.preventDefault();
+            if (!currentUser || currentUser.role !== 'admin') return;
+
+            const fullName = document.getElementById('newFullName').value.trim();
+            const username = document.getElementById('newUsername').value.trim().toLowerCase();
+            const pass = document.getElementById('newPassword').value.trim();
+            const role = document.getElementById('newRole').value;
+
+            if (usersDatabase.some(u => u.username === username)) {
+                alert("Este usuário de login já existe!");
+                return;
+            }
+
+            usersDatabase.push({ username, name: fullName, pass, role });
+            localStorage.setItem('usersDatabase_v10', JSON.stringify(usersDatabase));
+
+            document.getElementById('newFullName').value = '';
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+
+            renderUserList();
+            alert("Usuário criado com sucesso!");
+        }
+
+        function renderUserList() {
+            const container = document.getElementById('userListBox');
+            container.innerHTML = '';
+
+            usersDatabase.forEach(u => {
+                const div = document.createElement('div');
+                div.className = 'user-item';
+                div.style.cssText = "display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05);";
+                div.innerHTML = `
+                    <span><strong>${u.name}</strong> (${u.username})</span>
+                    <span style="color: ${u.role === 'admin' ? 'var(--accent-cyan)' : 'var(--text-muted)'}">${u.role === 'admin' ? 'Admin' : 'Visualização'}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderChart(selectedOp) {
+            const ctx = document.getElementById('operatorChart').getContext('2d');
+            const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+
+            const filteredData = availableOperators.filter(op => selectedOp === 'ALL' || selectedOp === op.operador);
+            const labels = filteredData.map(item => item.operador.split(' ')[0]);
+            
+            const counts = filteredData.map(opInfo => {
+                const opData = scheduleData.find(item => item.operador === opInfo.operador);
+                return opData ? (opData.shifts || []).filter(d => d.startsWith(monthPrefix)).length : 0;
+            });
+            
+            const colors = filteredData.map(item => item.hexColor);
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: colors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8' }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+    </script>
+</body>
+</html>
